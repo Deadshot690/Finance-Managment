@@ -2,16 +2,13 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// =================================================================================
-// IMPORTANT: REPLACE WITH THE NEW OWNER'S FIREBASE PROJECT CONFIG
-// =================================================================================
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_NEW_OWNER_API_KEY",
-  authDomain: "REPLACE_WITH_NEW_OWNER_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_NEW_OWNER_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_NEW_OWNER_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_NEW_OWNER_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_NEW_OWNER_APP_ID",
+  apiKey: "AIzaSyBrxaBrJ6dNQ_rhKmdMFYq3V13xeLrwr8U",
+  authDomain: "studio-3042253082-6d7cc.firebaseapp.com",
+  projectId: "studio-3042253082-6d7cc",
+  storageBucket: "studio-3042253082-6d7cc.appspot.com",
+  messagingSenderId: "369809817037",
+  appId: "1:369809817037:web:e65448f1d38d0a0435d884",
 };
 
 // Initialize Firebase
