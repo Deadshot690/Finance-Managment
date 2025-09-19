@@ -12,6 +12,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { seedInitialData } from '@/lib/firestore';
 
 export function SignupForm() {
   const [fullName, setFullName] = useState('');
@@ -25,8 +26,10 @@ export function SignupForm() {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      if (userCredential.user) {
-        await updateProfile(userCredential.user, { displayName: fullName });
+      const user = userCredential.user;
+      if (user) {
+        await updateProfile(user, { displayName: fullName });
+        await seedInitialData(user.uid);
       }
       router.push('/dashboard');
     } catch (error: any) {
