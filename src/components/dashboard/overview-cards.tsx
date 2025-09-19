@@ -37,7 +37,7 @@ export function OverviewCards() {
           <ArrowUpRight className="h-4 w-4 text-green-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+          <div className="text-2xl font-bold">₹{totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
           <p className="text-xs text-muted-foreground">This month</p>
         </CardContent>
       </Card>
@@ -47,7 +47,7 @@ export function OverviewCards() {
           <ArrowDownLeft className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+          <div className="text-2xl font-bold">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
           <p className="text-xs text-muted-foreground">This month</p>
         </CardContent>
       </Card>
@@ -57,7 +57,7 @@ export function OverviewCards() {
           <Wallet className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+          <div className="text-2xl font-bold">₹{balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
           <p className="text-xs text-muted-foreground">Your current balance</p>
         </CardContent>
       </Card>
@@ -67,7 +67,7 @@ export function OverviewCards() {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">$1,250 / $10,000</div>
+          <div className="text-2xl font-bold">₹1,250 / ₹10,000</div>
           <p className="text-xs text-muted-foreground">12.5% progress</p>
         </CardContent>
       </Card>

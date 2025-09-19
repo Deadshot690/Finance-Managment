@@ -59,7 +59,7 @@ export function BudgetList() {
                                 <div className="flex justify-between mb-1">
                                     <span className="font-medium">{budget.category}</span>
                                     <span className={cn("text-sm", overBudget ? "text-red-500 font-bold" : "text-muted-foreground")}>
-                                        ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
+                                        ₹{budget.spent.toFixed(2)} / ₹{budget.amount.toFixed(2)}
                                     </span>
                                 </div>
                                 <Progress value={Math.min(progress, 100)} className={cn(overBudget && "[&>div]:bg-red-500")} />
