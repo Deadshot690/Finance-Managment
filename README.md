@@ -2,7 +2,7 @@
 
 FinFlow is a modern, intuitive personal finance management application designed to help users track their income and expenses, set budgets, and gain insights into their spending habits. It leverages AI to provide personalized saving tips and budget recommendations.
 
-![FinFlow Dashboard](https://storage.googleapis.com/fsm-media/uploads/1722329731610-FinFlow%20Dashboard.png)
+
 
 ## Features
 
