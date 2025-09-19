@@ -37,7 +37,10 @@ export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      category: '',
+      amount: 0,
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -57,7 +60,7 @@ export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
         description: "Your new budget has been successfully saved.",
       });
       mutate([user.uid]); // Revalidate budget list
-      form.reset();
+      form.reset({ category: '', amount: 0 });
       setOpen(false);
     } catch (error) {
       toast({
@@ -86,7 +89,7 @@ export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
