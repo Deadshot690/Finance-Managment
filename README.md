@@ -2,18 +2,19 @@
 
 FinFlow is a modern, intuitive personal finance management application designed to help users track their income and expenses, set budgets, and gain insights into their spending habits. It leverages AI to provide personalized saving tips and budget recommendations.
 
-![FinFlow Dashboard](https://picsum.photos/seed/finflow-dashboard/1200/600)
+![FinFlow Dashboard](YOUR_SCREENSHOT_URL_HERE.png)
 
 ## Features
 
-- **Secure Authentication**: User registration and login functionality using Firebase Authentication (Email & Password).
-- **Dashboard Overview**: At-a-glance view of total income, expenses, and current balance with interactive charts.
-- **Transaction Management**: Easily add, view, edit and delete income and expense transactions.
-- **Budget Tracking**: Set monthly budgets for different spending categories and monitor progress.
+- **Secure Authentication**: User registration and login functionality using Firebase Authentication (Email & Password), including a "Forgot Password" flow.
+- **Dashboard Overview**: At-a-glance view of total income, expenses, and current balance with interactive charts powered by real-time user data.
+- **Full Transaction Management**: Easily add, view, edit, and delete income and expense transactions.
+- **Budget Tracking**: Set monthly budgets for different spending categories and monitor progress visually.
+- **Dynamic Savings Goals**: Users can set and update their own monthly savings goals, with progress tracked on the dashboard.
 - **AI-Powered Insights**:
     - **AI Budget Advisor**: Get personalized recommendations to optimize your budget based on your spending history.
     - **Custom AI Saving Tips**: Define your own rules to receive tailored saving tips from an AI assistant.
-- **Real-time Database**: All data is stored and synced in real-time using Google Firestore, ensuring a seamless experience.
+- **Real-time Database**: All data is stored and synced in real-time using Google Firestore, ensuring a seamless experience across sessions.
 - **Responsive Design**: A clean, modern UI built with ShadCN UI and Tailwind CSS that works beautifully on all devices.
 
 ## Tech Stack
@@ -98,8 +99,9 @@ This application requires a Firebase project to handle authentication and the da
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="YOUR_MESSAGING_SENDER_ID"
     NEXT_PUBLIC_FIREBASE_APP_ID="YOUR_APP_ID"
     ```
+    **Note**: The project comes with a working `firebase.ts` config, but it's best practice to use your own project's environment variables.
 
-4.  **Update Firebase Config in Code**:
+4.  **Update Firebase Config in Code** (Optional but Recommended):
     - Open the file `src/lib/firebase.ts`.
     - Replace the hardcoded `firebaseConfig` object with one that reads from your environment variables:
     ```ts
@@ -128,6 +130,6 @@ This application requires a Firebase project to handle authentication and the da
     npm run dev
     ```
 
-2.  Open your browser and navigate to [http://localhost:3000](http://localhost:3000) (or whatever port is shown in your terminal). You should see the login page.
+2.  Open your browser and navigate to the local URL provided in your terminal (usually [http://localhost:3000](http://localhost:3000) or a similar port). You should see the login page.
 
 You can now create an account and start using the application!
