@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -17,30 +16,26 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { expenseCategories } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
-import { addBudget } from '@/lib/firestore';
+import { setSavingsGoal } from '@/lib/firestore';
 import { useAuth } from '@/context/auth-context';
 import { Loader2 } from 'lucide-react';
 import { useUserData } from '@/context/user-data-context';
 
 const formSchema = z.object({
-  category: z.string({ required_error: 'Please select a category.' }),
-  amount: z.coerce.number().positive({ message: 'Budget amount must be positive.' }),
+  amount: z.coerce.number().positive({ message: 'Savings goal must be a positive number.' }),
 });
 
-export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
+export function SetSavingsGoalDialog({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { mutateBudgets } = useUserData();
+  const { savingsGoal, mutateSavingsGoal } = useUserData();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      category: '',
-      amount: 0,
+      amount: savingsGoal > 0 ? savingsGoal : undefined,
     },
   });
 
@@ -48,25 +43,24 @@ export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to set a budget.",
+        description: "You must be logged in to set a savings goal.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      await addBudget(user.uid, values);
+      await setSavingsGoal(user.uid, values.amount);
       toast({
-        title: "Budget Set",
-        description: "Your new budget has been successfully saved.",
+        title: "Savings Goal Updated",
+        description: "Your new savings goal has been saved.",
       });
-      mutateBudgets();
-      form.reset({ category: '', amount: 0 });
+      mutateSavingsGoal();
       setOpen(false);
     } catch (error) {
       toast({
-        title: "Error setting budget",
-        description: "Something went wrong. It's possible a budget for this category already exists.",
+        title: "Error",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
     }
@@ -77,43 +71,21 @@ export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Set New Budget</DialogTitle>
+          <DialogTitle>Set Monthly Savings Goal</DialogTitle>
           <DialogDescription>
-            Create a new spending limit for a specific category.
+            Define how much you want to save this month. Your progress will be tracked on the dashboard.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {expenseCategories.map(cat => (
-                        <SelectItem key={cat.value} value={cat.label}>{cat.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
              <FormField
               control={form.control}
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Budget Amount</FormLabel>
+                  <FormLabel>Goal Amount</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0.00" {...field} />
+                    <Input type="number" placeholder="10000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,7 +95,7 @@ export function SetBudgetDialog({ children }: { children: React.ReactNode }) {
                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Set Budget
+                Set Goal
               </Button>
             </DialogFooter>
           </form>

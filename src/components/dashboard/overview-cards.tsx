@@ -2,17 +2,12 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ArrowDownLeft, ArrowUpRight, DollarSign, Wallet } from "lucide-react";
-import { useAuth } from "@/context/auth-context";
-import useSWR from 'swr';
-import { getTransactions } from "@/lib/firestore";
 import { Skeleton } from "../ui/skeleton";
-import type { Transaction } from "@/lib/types";
-
-const fetcher = ([, userId]: [string, string]) => getTransactions(userId);
+import { useUserData } from "@/context/user-data-context";
+import { SetSavingsGoalDialog } from "./set-savings-goal-dialog";
 
 export function OverviewCards() {
-  const { user } = useAuth();
-  const { data: transactions, isLoading } = useSWR(user ? ['transactions', user.uid] : null, fetcher);
+  const { transactions, savingsGoal, isLoading } = useUserData();
 
   if (isLoading || !transactions) {
     return (
@@ -28,6 +23,7 @@ export function OverviewCards() {
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
   const balance = totalIncome - totalExpenses;
+  const savingsProgress = savingsGoal > 0 ? (balance / savingsGoal) * 100 : 0;
 
   return (
     <>
@@ -61,16 +57,22 @@ export function OverviewCards() {
           <p className="text-xs text-muted-foreground">Your current balance</p>
         </CardContent>
       </Card>
-       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Savings Goal</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">₹1,250 / ₹10,000</div>
-          <p className="text-xs text-muted-foreground">12.5% progress</p>
-        </CardContent>
-      </Card>
+       <SetSavingsGoalDialog>
+        <Card className="hover:bg-muted/50 cursor-pointer">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Savings Goal</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+                ₹{balance > 0 ? balance.toLocaleString('en-IN') : 0} / ₹{savingsGoal.toLocaleString('en-IN')}
+            </div>
+            <p className="text-xs text-muted-foreground">
+                {savingsProgress.toFixed(1)}% progress
+            </p>
+          </CardContent>
+        </Card>
+      </SetSavingsGoalDialog>
     </>
   );
 }

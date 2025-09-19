@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, addDoc, query, orderBy, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, addDoc, query, orderBy, serverTimestamp, writeBatch, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Transaction, Budget } from './types';
 import { budgets as placeholderBudgets, transactions as placeholderTransactions } from './placeholder-data';
@@ -10,8 +10,7 @@ export const getTransactions = async (userId: string): Promise<Transaction[]> =>
   const transactionSnapshot = await getDocs(q);
   const transactionList = transactionSnapshot.docs.map(doc => {
     const data = doc.data();
-    // Safely convert timestamp to date string
-    const date = data.date?.toDate ? data.date.toDate().toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const date = data.date?.toDate ? data.date.toDate().toISOString() : new Date().toISOString();
     return {
       id: doc.id,
       ...data,
@@ -30,6 +29,20 @@ export const addTransaction = async (userId: string, transaction: Omit<Transacti
   });
 };
 
+// Update a transaction
+export const updateTransaction = async (userId: string, transactionId: string, transaction: Omit<Transaction, 'id' | 'date'> & { date: Date }) => {
+    const transactionDoc = doc(db, 'users', userId, 'transactions', transactionId);
+    await updateDoc(transactionDoc, {
+        ...transaction,
+    });
+};
+
+// Delete a transaction
+export const deleteTransaction = async (userId: string, transactionId: string) => {
+    const transactionDoc = doc(db, 'users', userId, 'transactions', transactionId);
+    await deleteDoc(transactionDoc);
+};
+
 // Fetch budgets for a user
 export const getBudgets = async (userId: string): Promise<Budget[]> => {
     const budgetsCol = collection(db, 'users', userId, 'budgets');
@@ -43,7 +56,6 @@ export const getBudgets = async (userId: string): Promise<Budget[]> => {
 
 // Set a new budget for a user
 export const addBudget = async (userId: string, budget: Omit<Budget, 'id' | 'spent'>) => {
-    // We use the category name as the document ID to prevent duplicate budgets for the same category.
     const budgetDoc = doc(db, 'users', userId, 'budgets', budget.category);
     await setDoc(budgetDoc, {
         category: budget.category,
@@ -51,10 +63,29 @@ export const addBudget = async (userId: string, budget: Omit<Budget, 'id' | 'spe
     });
 };
 
+// Get savings goal for a user
+export const getSavingsGoal = async (userId: string): Promise<number> => {
+    const userDocRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists() && userDoc.data().savingsGoal) {
+        return userDoc.data().savingsGoal;
+    }
+    return 10000; // Default goal
+};
+
+// Set savings goal for a user
+export const setSavingsGoal = async (userId: string, amount: number) => {
+    const userDocRef = doc(db, 'users', userId);
+    await setDoc(userDocRef, { savingsGoal: amount }, { merge: true });
+};
+
 
 // Seed initial data for a new user
 export const seedInitialData = async (userId: string) => {
     const batch = writeBatch(db);
+
+    const userDocRef = doc(db, 'users', userId);
+    batch.set(userDocRef, { savingsGoal: 10000 });
 
     // Seed transactions
     const transactionsCol = collection(db, 'users', userId, 'transactions');
@@ -70,7 +101,6 @@ export const seedInitialData = async (userId: string) => {
 
     // Seed budgets
     placeholderBudgets.forEach(budget => {
-        // Use category as the ID
         const docRef = doc(db, 'users', userId, 'budgets', budget.category);
         const { id, spent, ...data } = budget;
         batch.set(docRef, data);

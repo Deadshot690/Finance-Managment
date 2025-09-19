@@ -3,7 +3,7 @@ export type Transaction = {
   type: 'income' | 'expense';
   category: string;
   amount: number;
-  date: string;
+  date: string; // Should be ISO string
   description: string;
 };
 

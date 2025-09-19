@@ -1,7 +1,5 @@
-
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,7 +11,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -23,14 +20,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { expenseCategories, incomeCategories } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
-import { addTransaction } from '@/lib/firestore';
+import { updateTransaction } from '@/lib/firestore';
 import { useAuth } from '@/context/auth-context';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import type { Transaction } from '@/lib/types';
 import { useUserData } from '@/context/user-data-context';
-
-type TransactionType = 'income' | 'expense';
 
 const formSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -40,8 +36,13 @@ const formSchema = z.object({
   date: z.date({ required_error: 'Please select a date.' }),
 });
 
-export function AddTransactionDialog({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
+interface EditTransactionDialogProps {
+    transaction: Transaction;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
+export function EditTransactionDialog({ transaction, open, onOpenChange }: EditTransactionDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { mutateTransactions, mutateBudgets } = useUserData();
@@ -49,11 +50,9 @@ export function AddTransactionDialog({ children }: { children: React.ReactNode }
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: 'expense',
-      date: new Date(),
-      amount: 0,
-      category: '',
-      description: '',
+        ...transaction,
+        date: new Date(transaction.date),
+        description: transaction.description || '',
     },
   });
 
@@ -61,41 +60,28 @@ export function AddTransactionDialog({ children }: { children: React.ReactNode }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to add a transaction.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "You must be logged in.", variant: "destructive" });
       return;
     }
 
     try {
-      await addTransaction(user.uid, values);
-      toast({
-        title: "Transaction Added",
-        description: "Your new transaction has been successfully recorded.",
-      });
+      await updateTransaction(user.uid, transaction.id, values);
+      toast({ title: "Success", description: "Transaction has been updated." });
       mutateTransactions();
       mutateBudgets();
-      form.reset({ type: 'expense', date: new Date(), amount: 0, description: '', category: '' });
-      setOpen(false);
+      onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Error adding transaction",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>Edit Transaction</DialogTitle>
           <DialogDescription>
-            Add a new income or expense to track your finances.
+            Update the details of your transaction.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -213,7 +199,7 @@ export function AddTransactionDialog({ children }: { children: React.ReactNode }
             <DialogFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Transaction
+                Save Changes
               </Button>
             </DialogFooter>
           </form>

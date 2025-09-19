@@ -3,19 +3,13 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import useSWR from 'swr';
-import { useAuth } from "@/context/auth-context";
-import { getBudgets, getTransactions } from "@/lib/firestore";
 import { Skeleton } from "../ui/skeleton";
-import type { Budget, Transaction } from "@/lib/types";
+import { useUserData } from "@/context/user-data-context";
 
-const fetcher = async ([userId]: [string]) => {
-    const [budgets, transactions] = await Promise.all([
-        getBudgets(userId),
-        getTransactions(userId),
-    ]);
+export function BudgetList() {
+    const { budgets, transactions, isLoading } = useUserData();
 
-    const spendingByCategory = transactions
+    const spendingByCategory = (transactions ?? [])
         .filter(t => t.type === 'expense')
         .reduce((acc, t) => {
             if (!acc[t.category]) {
@@ -25,15 +19,10 @@ const fetcher = async ([userId]: [string]) => {
             return acc;
         }, {} as { [key: string]: number });
 
-    return budgets.map(budget => ({
+    const budgetsWithSpending = (budgets ?? []).map(budget => ({
         ...budget,
         spent: spendingByCategory[budget.category] || 0
     }));
-};
-
-export function BudgetList() {
-    const { user } = useAuth();
-    const { data: budgets, isLoading } = useSWR(user ? [user.uid] : null, fetcher);
 
   return (
     <Card>
@@ -51,7 +40,7 @@ export function BudgetList() {
                         <Skeleton className="h-10 w-full" />
                     </div>
                 ) : (
-                    budgets?.map(budget => {
+                    budgetsWithSpending?.map(budget => {
                         const progress = (budget.spent / budget.amount) * 100;
                         const overBudget = progress > 100;
                         return (
@@ -68,7 +57,7 @@ export function BudgetList() {
                         )
                     })
                 )}
-                 {!isLoading && budgets?.length === 0 && (
+                 {!isLoading && budgetsWithSpending?.length === 0 && (
                     <p className="text-center text-muted-foreground">No budgets set yet.</p>
                  )}
             </div>
