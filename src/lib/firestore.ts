@@ -10,10 +10,12 @@ export const getTransactions = async (userId: string): Promise<Transaction[]> =>
   const transactionSnapshot = await getDocs(q);
   const transactionList = transactionSnapshot.docs.map(doc => {
     const data = doc.data();
+    // Safely convert timestamp to date string
+    const date = data.date?.toDate ? data.date.toDate().toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
     return {
       id: doc.id,
       ...data,
-      date: data.date?.toDate()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
+      date,
     } as Transaction;
   });
   return transactionList;
@@ -39,6 +41,17 @@ export const getBudgets = async (userId: string): Promise<Budget[]> => {
     return budgetList;
 };
 
+// Set a new budget for a user
+export const addBudget = async (userId: string, budget: Omit<Budget, 'id' | 'spent'>) => {
+    // We use the category name as the document ID to prevent duplicate budgets for the same category.
+    const budgetDoc = doc(db, 'users', userId, 'budgets', budget.category);
+    await setDoc(budgetDoc, {
+        category: budget.category,
+        amount: budget.amount,
+    });
+};
+
+
 // Seed initial data for a new user
 export const seedInitialData = async (userId: string) => {
     const batch = writeBatch(db);
@@ -56,10 +69,10 @@ export const seedInitialData = async (userId: string) => {
     });
 
     // Seed budgets
-    const budgetsCol = collection(db, 'users', userId, 'budgets');
     placeholderBudgets.forEach(budget => {
-        const docRef = doc(budgetsCol);
-        const { id, ...data } = budget;
+        // Use category as the ID
+        const docRef = doc(db, 'users', userId, 'budgets', budget.category);
+        const { id, spent, ...data } = budget;
         batch.set(docRef, data);
     });
 
