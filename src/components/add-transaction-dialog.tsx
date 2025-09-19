@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -49,6 +50,9 @@ export function AddTransactionDialog({ children }: { children: React.ReactNode }
     defaultValues: {
       type: 'expense',
       date: new Date(),
+      amount: 0,
+      category: '',
+      description: '',
     },
   });
 
@@ -73,7 +77,7 @@ export function AddTransactionDialog({ children }: { children: React.ReactNode }
       // Revalidate SWR cache
       mutate(['transactions', user.uid]);
       mutate([user.uid]); // for budget list
-      form.reset({ type: 'expense', date: new Date(), amount: 0, description: '' });
+      form.reset({ type: 'expense', date: new Date(), amount: 0, description: '', category: '' });
       setOpen(false);
     } catch (error) {
       toast({
@@ -123,7 +127,7 @@ export function AddTransactionDialog({ children }: { children: React.ReactNode }
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
