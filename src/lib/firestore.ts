@@ -8,11 +8,14 @@ export const getTransactions = async (userId: string): Promise<Transaction[]> =>
   const transactionsCol = collection(db, 'users', userId, 'transactions');
   const q = query(transactionsCol, orderBy('date', 'desc'));
   const transactionSnapshot = await getDocs(q);
-  const transactionList = transactionSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    date: doc.data().date.toDate().toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
-  })) as Transaction[];
+  const transactionList = transactionSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      date: data.date?.toDate()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0], // Convert timestamp to YYYY-MM-DD
+    } as Transaction;
+  });
   return transactionList;
 };
 
@@ -55,7 +58,7 @@ export const seedInitialData = async (userId: string) => {
     // Seed budgets
     const budgetsCol = collection(db, 'users', userId, 'budgets');
     placeholderBudgets.forEach(budget => {
-        const docRef = doc(budgetsCol, budget.category.toLowerCase());
+        const docRef = doc(budgetsCol);
         const { id, ...data } = budget;
         batch.set(docRef, data);
     });
