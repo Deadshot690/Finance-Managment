@@ -2,18 +2,25 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-
-const data = [
-  { name: 'Food', value: 400 },
-  { name: 'Shopping', value: 300 },
-  { name: 'Transport', value: 200 },
-  { name: 'Bills', value: 278 },
-  { name: 'Health', value: 189 },
-];
+import { useUserData } from '@/context/user-data-context';
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 export function SpendingBreakdownChart() {
+  const { transactions } = useUserData();
+
+  const spendingByCategory = (transactions ?? [])
+    .filter(t => t.type === 'expense')
+    .reduce((acc, t) => {
+      if (!acc[t.category]) {
+        acc[t.category] = { name: t.category, value: 0 };
+      }
+      acc[t.category].value += t.amount;
+      return acc;
+    }, {} as { [key: string]: { name: string, value: number } });
+  
+  const data = Object.values(spendingByCategory);
+
   return (
     <Card>
       <CardHeader>
