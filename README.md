@@ -133,3 +133,7 @@ This application requires a Firebase project to handle authentication and the da
 2.  Open your browser and navigate to the local URL provided in your terminal (usually [http://localhost:3000](http://localhost:3000) or a similar port). You should see the login page.
 
 You can now create an account and start using the application!
+
+### Author
+
+Mohd Juned Md Taufik Bhojani 
